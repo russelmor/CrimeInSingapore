@@ -1,0 +1,122 @@
+---
+title: "Crime in Singapore"
+output:
+  pdf_document: default
+  html_document: default
+date: "2023-01-16"
+---
+
+start with the bigger picture (overall crime trend over the years, next look at the trend for each crime, maybe can also look at the composition of crime every year and see whether this has changed over the years)
+
+This is what the dataset looks like
+```{r}
+data <- read.csv("C:/Users/crist/Documents/cases-recorded-for-selected-major-offences.csv")
+head(data)
+tail(data)
+```
+
+Here are the ten crimes that are included in the dataset
+```{r}
+unique_crimes <- unique(data$level_2)
+unique_crimes
+```
+Here are the total number of the crimes committed in the year 2011 to 2020 in Singapore
+```{r}
+library(dplyr)
+count_crimes <- function(x){
+  number <- data |>
+    filter(year == x) |>
+    summarise(total = sum(value))
+  return(number)
+}
+bruh <- c(10, 20, 30)
+Year <- unique(data$year)
+Year
+output <- vector("double", 10)
+for (i in seq_along(year)) {
+  output[i] <- count_crimes(year[i])
+}
+Total <- unlist(output)
+df_1 <- data.frame(Year, Total)
+df_1
+
+```
+The total number of crimes committed has increased over the years
+```{r}
+library(ggplot2)
+library(plotly)
+graph_1 <- ggplot(df_1, aes(Year, Total)) +
+  geom_line() +
+  scale_x_continuous(limits = c(2011, 2020), breaks = seq(2011, 2020, 1))
+graph_1
+```
+```{r}
+graph_2 <- plot_ly(df_1, x = Year, y = Total, type = "scatter", mode = "lines") 
+graph_2   # another option
+
+```
+```{r}
+library(dygraphs)
+library(tidyr)
+df_1 |>
+  select(Year, Total) |>
+  dygraph(main = "Crimes over time") # another option
+```
+Let's take a closer look at each crime, starting with murder. Overall, there is a decrease in the number of murder committed in Singapore from 2011 to 2020. There is a sharp fall from 2011 to 2012, 2016 to 2017 and 2019 to 2020, the latter can be attributed to the pandemic. 
+```{r}
+data_murder <- data |>
+  filter(level_2 == "Murder") 
+data_murder
+graph_3 <- ggplot(data_murder, aes(year, value)) +
+  geom_line() +
+  scale_x_continuous(limits = c(2011, 2020), breaks = seq(2011, 2020, 1)) +
+  xlab("Year") +
+  ylab("Murder Number")
+graph_3
+
+```
+Next, we look at serious hurt. Unlike murder, the number of serious hurt cases has seen an overall increase from 2011 to 2020. There is a spike in the number of cases between 2019 and 2020. 
+```{r}
+serioushurt_data <- data |>
+  filter(level_2 == "Serious Hurt")
+
+serioushurt_data
+graph_4 <- ggplot(serioushurt_data, aes(year, value)) +
+  geom_line() + 
+  scale_x_continuous(breaks = seq(2011, 2020, 1), limits = c(2011, 2020))
+
+graph_4
+```
+
+There has also been an overall increase in the number of rape cases from 2011 to 2020. The increase is more than 100%!
+```{r}
+rape_data <- data |>
+  filter(level_2 == "Rape")
+rape_data
+
+graph_5 <- rape_data |>
+  dygraph(main = "Rape Trend")
+graph_5
+```
+
+There was a sharp increase in the number of outrage of modesty cases in Singapore between 2016 and 2018, but there is an overall decrease from 2011 to 2020. 
+```{r}
+outrage_data <- data |>
+  filter(level_2 == "Outrage Of Modesty")
+
+outrage_data
+graph_6 <- outrage_data |>
+  dygraph(main = "Outrage of Modesty")
+graph_6
+```
+
+There has been a fall in the number of rioting cases over the years. The large decrease between 2019 and 2020 can be attributed to COVID-19 restrictions. 
+```{r}
+rioting_data <- data |>
+  filter(level_2 == "Rioting")
+rioting_data
+graph_7 <- rioting_data |>
+  dygraph(main = "Rioting")
+graph_7
+```
+
